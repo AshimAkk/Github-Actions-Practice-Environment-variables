@@ -4,9 +4,16 @@ on:
     branches:
       - main
       - dev
+env:
+  # name of the database will also be the same
+  MONGODB_DB_NAME: MONGO-DB
 jobs:
   test:
-    environment: testing
+    env:
+      PORT: 8080 # ensures that the webserver is launched successfully and listens on the right port
+      MONGODB_CLUSTER_ADDRESS: environmental-variables.ke2n9.mongodb.net
+      MONGODB_USERNAME: ashimk
+      MONGODB_PASSWORD: Valhalla # it is best practice not to include secrets in your code.
     runs-on: ubuntu-latest
     steps:
       - name: Get Code
@@ -19,15 +26,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Run server
-        run: npm start & npx wait-on http://127.0.0.1:XYZ
+        run: npm start & npx wait-on http://127.0.0.1:$PORT
       - name: Run tests
         run: npm test
       - name: Output information
-        run: echo "..."
+        run: |
+          echo  "MONGODB_USERNAME: ${{ env.MONGODB_USERNAME }}"
   deploy:
     needs: test
     runs-on: ubuntu-latest
     steps:
       - name: Output information
-        run: |        
-          echo "..."
+        run: |
+          echo "MONGODB_USERNAME: ${{ env.MONGODB_USERNAME }}" 
+          echo  "MONGODB_DB_NAME: ${{ env.MONGODB_DB_NAME }}"
